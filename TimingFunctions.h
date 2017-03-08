@@ -20,25 +20,28 @@
 
 namespace TimingFunctions
 {
+
+    #define PI 3.14159
+
     
-#define PI 3.14159
     
-    inline float Linear(float t)
+    std::function<float(float t)> Linear = [](float t)
     {
         return t;
-    }
+    };
+
     
-    inline float QuadraticEaseIn(float t)
+    std::function<float(float t)> QuadraticEaseIn = [](float t)
     {
         return t * t;
-    }
+    };
     
-    inline float QuadraticEaseOut(float t)
+    std::function<float(float t)> QuadraticEaseOut = [](float t)
     {
         return t * (2.0f - t);
-    }
+    };
     
-    inline float QuadraticEaseInOut(float t)
+    std::function<float(float t)> QuadraticEaseInOut = [](float t)
     {
         if (t < 0.5f)
         {
@@ -49,20 +52,20 @@ namespace TimingFunctions
             float f = t - 1.0f;
             return 1.0f - 2.0f * f * f;
         }
-    }
+    };
     
-    inline float CubicEaseIn(float t)
+    std::function<float(float t)> CubicEaseIn = [](float t)
     {
         return t * t * t;
-    }
+    };
     
-    inline float CubicEaseOut(float t)
+    std::function<float(float t)> CubicEaseOut = [](float t)
     {
         float f = t - 1.0f;
         return 1.0f + f * f * f;
-    }
+    };
     
-    inline float CubicEaseInOut(float t)
+    std::function<float(float t)> CubicEaseInOut = [](float t)
     {
         if (t < 0.5f)
         {
@@ -73,20 +76,20 @@ namespace TimingFunctions
             float f = t - 1.0f;
             return 1.0f + 4.0f * f * f * f;
         }
-    }
+    };
     
-    inline float QuarticEaseIn(float t)
+    std::function<float(float t)> QuarticEaseIn = [](float t)
     {
         return t * t * t * t;
-    }
+    };
     
-    inline float QuarticEaseOut(float t)
+    std::function<float(float t)> QuarticEaseOut = [](float t)
     {
         float f = t - 1.0f;
         return 1.0f - f * f * f * f;
-    }
+    };
     
-    inline float QuarticEaseInOut(float t)
+    std::function<float(float t)> QuarticEaseInOut = [](float t)
     {
         if (t < 0.5f)
         {
@@ -97,20 +100,20 @@ namespace TimingFunctions
             float f = t - 1.0f;
             return 1.0f - 8.0f * f * f * f * f;
         }
-    }
+    };
     
-    inline float QuinticEaseIn(float t)
+    std::function<float(float t)> QuinticEaseIn = [](float t)
     {
         return t * t * t * t * t;
-    }
+    };
     
-    inline float QuinticEaseOut(float t)
+    std::function<float(float t)> QuinticEaseOut = [](float t)
     {
         float f = t - 1.0f;
         return 1.0f + f * f * f * f * f;
-    }
+    };
     
-    inline float QuinticEaseInOut(float t)
+    std::function<float(float t)> QuinticEaseInOut = [](float t)
     {
         if (t < 0.5f)
         {
@@ -121,34 +124,34 @@ namespace TimingFunctions
             float f = t - 1.0f;
             return 1.0f + 16.0f * f * f * f * f * f;
         }
-    }
+    };
     
-    inline float SineEaseIn(float t)
+    std::function<float(float t)> SineEaseIn = [](float t)
     {
         return sin((t - 1.0f) * PI/2.0f) + 1.0f;
-    }
+    };
     
-    inline float SineEaseOut(float t)
+    std::function<float(float t)> SineEaseOut = [](float t)
     {
         return sin(t * PI/2.0f);
-    }
+    };
     
-    inline float SineEaseInOut(float t)
+    std::function<float(float t)> SineEaseInOut = [](float t)
     {
         return 0.5f * (1.0f - cos(t * PI));
-    }
+    };
     
-    inline float CircularEaseIn(float t)
+    std::function<float(float t)> CircularEaseIn = [](float t)
     {
         return 1.0f - sqrt(1.0f - t * t);
-    }
+    };
     
-    inline float CircularEaseOut(float t)
+    std::function<float(float t)> CircularEaseOut = [](float t)
     {
         return sqrt((2.0f - t) * t);
-    }
+    };
     
-    inline float CircularEaseInOut(float t)
+    std::function<float(float t)> CircularEaseInOut = [](float t)
     {
         if (t < 0.5f)
         {
@@ -158,19 +161,19 @@ namespace TimingFunctions
         {
             return 0.5f * sqrt(-4.0f * t * t + 8.0f * t - 3.0f) + 0.5f;
         }
-    }
+    };
     
-    inline float ExponentialEaseIn(float t)
+    std::function<float(float t)> ExponentialEaseIn = [](float t)
     {
         return (t == 0.0f) ? t : pow(2.0f, 10.0f * (t - 1.0f));
-    }
+    };
     
-    inline float ExponentialEaseOut(float t)
+    std::function<float(float t)> ExponentialEaseOut = [](float t)
     {
         return (t == 1.0f) ? t : 1.0f - pow(2.0f, -10.0f * t);
-    }
+    };
     
-    inline float ExponentialEaseInOut(float t)
+    std::function<float(float t)> ExponentialEaseInOut = [](float t)
     {
         if (t == 0.0f || t == 1.0f)
         {
@@ -178,25 +181,25 @@ namespace TimingFunctions
         }
         else if (t < 0.5f)
         {
-            return 0.5f * pow(2.0f, 20.0f * t - 10.0f);
+            return static_cast<float>(0.5f * pow(2.0f, 20.0f * t - 10.0f));
         }
         else
         {
-            return 1.0f - 0.5f * pow(2.0f, -20.0f * t + 10.0f);
+            return static_cast<float>(1.0f - 0.5f * pow(2.0f, -20.0f * t + 10.0f));
         }
-    }
+    };
     
-    float ElasticEaseIn(float t)
+    std::function<float(float t)> ElasticEaseIn = [](float t)
     {
         return sin(13 * M_PI_2 * t) * pow(2, 10 * (t - 1));
-    }
+    };
     
-    float ElasticEaseOut(float t)
+    std::function<float(float t)> ElasticEaseOut = [](float t)
     {
         return sin(-13 * M_PI_2 * (t + 1)) * pow(2, -10 * t) + 1;
-    }
+    };
     
-    float ElasticEaseInOut(float t)
+    std::function<float(float t)> ElasticEaseInOut = [](float t)
     {
         if(t < 0.5)
         {
@@ -206,20 +209,20 @@ namespace TimingFunctions
         {
             return 0.5 * (sin(-13 * M_PI_2 * ((2 * t - 1) + 1)) * pow(2, -10 * (2 * t - 1)) + 2);
         }
-    }
+    };
     
-    inline float BackEaseIn(float t)
+    std::function<float(float t)> BackEaseIn = [](float t)
     {
         return t * t * t - t * sin(t * M_PI);
-    }
+    };
     
-    inline float BackEaseOut(float t)
+    std::function<float(float t)> BackEaseOut = [](float t)
     {
         float f = (1 - t);
         return 1 - (f * f * f - f * sin(f * M_PI));
-    }
+    };
 
-    inline float BackEaseInOut(float t)
+    std::function<float(float t)> BackEaseInOut = [](float t)
     {
         if(t < 0.5)
         {
@@ -231,9 +234,9 @@ namespace TimingFunctions
             float f = (1 - (2*t - 1));
             return 0.5 * (1 - (f * f * f - f * sin(f * M_PI))) + 0.5;
         }
-    }
+    };
     
-    inline float BounceEaseOut(float t)
+    std::function<float(float t)> BounceEaseOut = [](float t)
     {
         if(t < 4/11.0)
         {
@@ -251,14 +254,14 @@ namespace TimingFunctions
         {
             return (54/5.0 * t * t) - (513/25.0 * t) + 268/25.0;
         }
-    }
+    };
 
-    inline float BounceEaseIn(float t)
+    std::function<float(float t)> BounceEaseIn = [](float t)
     {
         return 1 - BounceEaseOut(1 - t);
-    }
+    };
     
-    inline float BounceEaseInOut(float t)
+    std::function<float(float t)> BounceEaseInOut = [](float t)
     {
         if(t < 0.5)
         {
@@ -268,17 +271,17 @@ namespace TimingFunctions
         {
             return 0.5 * BounceEaseOut(t * 2 - 1) + 0.5;
         }
-    }
+    };
     
-    inline float Smoothstep(float t)
+    std::function<float(float t)> Smoothstep = [](float t)
     {
         return t * t * (3.0f - 2.0f * t);
-    }
+    };
     
-    inline float Smootherstep(float t)
+    std::function<float(float t)> Smootherstep = [](float t)
     {
         return 6.0f * pow(t, 5.0f) - 15.0f * pow(t, 4.0f) + 10.0f * pow(t, 3.0f);
-    }
+    };
 }
 
 

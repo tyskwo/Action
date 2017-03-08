@@ -55,7 +55,7 @@ int main(int argc, const char * argv[])
     // let's create two single Actions:
     
     //                value,   duration, delay, timing function,                     callback
-    Action::addSingle(&value1, 3.0f,     6.5f,  TimingFunctions::ExponentialEaseIn,  std::bind([&](){ t->OnComplete("SINGLE", 1); }), LoopTypes::None);
+    Action::addSingle(&value1, 3.0f,     0.5f,  TimingFunctions::ExponentialEaseIn,  std::bind([&](){ t->OnComplete("SINGLE", 1); }), LoopTypes::None);
     Action::addSingle(&value2, 3.0f,            TimingFunctions::ExponentialEaseOut, std::bind([&](){ t->OnComplete("SINGLE", 2); }), LoopTypes::None);
 */
  
@@ -110,7 +110,7 @@ int main(int argc, const char * argv[])
     {
         Action::update();
         
-        //std::cout << t->testInt << "    " << t->testFloat << "    " << t->testChar << '\n'; // print out current value to see it in progress
+        std::cout << t->testInt << "    " << t->testFloat << "    " << t->testChar << '\n'; // print out current value to see it in progress
     }
     
     
