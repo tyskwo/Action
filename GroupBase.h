@@ -17,50 +17,54 @@
 
 
 
-
-class GroupBase : public ActionBase
+namespace Action
 {
-    
-protected:
-    
-    std::vector<SingleBase*> singles {};
-    
-    
-    
-public:
-    
-    virtual ~GroupBase() {};
-    
-    
-    
-    inline bool isFinished()
+
+    class GroupBase : public ActionBase
     {
-        if(singles.size() == 0) return true;
+        
+    protected:
+        
+        std::vector<SingleBase*> singles {};
         
         
-        // this loop checks for looptypes of each Single, because a Single will never be finished if it loops
-        bool returnValue = true;
         
-        for(auto&& s : singles)
+    public:
+        
+        virtual ~GroupBase() {};
+        
+        
+        
+        inline bool isFinished()
         {
-            if(!s->isFinished()) { returnValue = false; break; }
-        }
+            if(singles.size() == 0) return true;
+            
+            
+            // this loop checks for looptypes of each Single, because a Single will never be finished if it loops
+            bool returnValue = true;
+            
+            for(auto&& s : singles)
+            {
+                if(!s->isFinished()) { returnValue = false; break; }
+            }
+            
+            return returnValue;
+        };
         
-        return returnValue;
+        
+        
+        void stop()
+        {
+            for(auto&& s : singles)
+            {
+                s->stop();
+            }
+            
+            delete this;
+        }
     };
     
-    
-    
-    void stop()
-    {
-        for(auto&& s : singles)
-        {
-            s->stop();
-        }
-        
-        delete this;
-    }
-};
+}
 
 
 

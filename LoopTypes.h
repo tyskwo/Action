@@ -12,11 +12,14 @@
 
 
 
-
-
-namespace LoopTypes
+namespace Action
 {
-    enum Type { None, Normal, Yoyo };
+
+    namespace LoopTypes
+    {
+        enum Type { None, Normal, Yoyo };
+    }
+    
 }
 
 

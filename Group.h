@@ -17,56 +17,60 @@
 
 
 
-
-// A grouping of Actions
-class Group : public GroupBase
+namespace Action
 {
-    
-public:
-    
-    Group(std::vector<SingleBase*> s) { singles = s; }
-    
-    
-    
-    void start()
+
+    // A grouping of Actions
+    class Group : public GroupBase
     {
-        for(auto&& s : singles)
+        
+    public:
+        
+        Group(std::vector<SingleBase*> s) { singles = s; }
+        
+        
+        
+        void start()
         {
-            s->setDelay(s->getDelay() + delay);
-            
-            if(looptype > LoopTypes::None) s->setLooptype(looptype);
-            
-            s->start();
-        }
-    }
-    
-    
-    
-    bool update()
-    {
-        for(int i = 0; i < singles.size(); i++)
-        {
-            singles.at(i)->update();
-            
-            if(singles.at(i)->isFinished() && looptype == LoopTypes::None)
+            for(auto&& s : singles)
             {
-                delete singles.at(i); singles.at(i) = NULL;
+                s->setDelay(s->getDelay() + delay);
                 
-                singles.erase(singles.begin() + i);
-                ++i;
-            }
-            
-            if(isFinished())
-            {
-                callback();
+                if(looptype > LoopTypes::None) s->setLooptype(looptype);
                 
-                return true;
+                s->start();
             }
         }
         
-        return false;
-    }
-};
+        
+        
+        bool update()
+        {
+            for(int i = 0; i < singles.size(); i++)
+            {
+                singles.at(i)->update();
+                
+                if(singles.at(i)->isFinished() && looptype == LoopTypes::None)
+                {
+                    delete singles.at(i); singles.at(i) = NULL;
+                    
+                    singles.erase(singles.begin() + i);
+                    ++i;
+                }
+                
+                if(isFinished())
+                {
+                    callback();
+                    
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+    };
+    
+}
 
 
 

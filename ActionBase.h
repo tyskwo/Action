@@ -26,110 +26,114 @@ typedef std::function<void()> Callback;
 
 
 
-
-
-class ActionBase
+namespace Action
 {
-protected:
-    
-    float           delay;
-    bool            finished;
-    Callback        callback;
-    LoopTypes::Type looptype;
-    
-    
-    
-public:
-    
-    virtual ~ActionBase() {};
-    
-    
-    
-    virtual bool update() = 0;
-    
-    
-    
-    virtual inline bool isFinished() { return finished; };
-    
-    
-    
-    inline void setCallback(Callback        cb)    { this->callback = cb;    }
-    inline void setLooptype(LoopTypes::Type loop)  { this->looptype = loop;  }
-    inline void setDelay   (float           delay) { this->delay    = delay; }
-    
-    
-    
-    inline float           getDelay()    { return delay;    }
-    inline LoopTypes::Type getLooptype() { return looptype; }
-    
-    
-    
-    
-    
-    virtual void start() = 0;
-    
-    void start(float delay)
+
+    class ActionBase
     {
-        this->delay = delay;
         
-        this->start();
-    }
-    
-    void start(Callback callback)
-    {
-        this->callback = callback;
+    protected:
         
-        this->start();
-    }
-    
-    void start(LoopTypes::Type loop)
-    {
-        this->looptype = loop;
+        float           delay;
+        bool            finished;
+        Callback        callback;
+        LoopTypes::Type looptype;
         
-        this->start();
-    }
-    
-    void start(float delay, Callback callback)
-    {
-        this->callback = callback;
         
-        this->start(delay);
-    }
-    
-    void start(float delay, LoopTypes::Type loop)
-    {
-        this->looptype = loop;
         
-        this->start(delay);
-    }
-    
-    void start(Callback callback, LoopTypes::Type loop)
-    {
-        this->callback = callback;
+    public:
         
-        this->start(loop);
-    }
-    
-    void start(float delay, Callback callback, LoopTypes::Type loop)
-    {
-        this->delay    = delay;
-        this->callback = callback;
+        virtual ~ActionBase() {};
         
-        this->start(loop);
-    }
+        
+        
+        virtual bool update() = 0;
+        
+        
+        
+        virtual inline bool isFinished() { return finished; };
+        
+        
+        
+        inline void setCallback(Callback        cb)    { this->callback = cb;    }
+        inline void setLooptype(LoopTypes::Type loop)  { this->looptype = loop;  }
+        inline void setDelay   (float           delay) { this->delay    = delay; }
+        
+        
+        
+        inline float           getDelay()    { return delay;    }
+        inline LoopTypes::Type getLooptype() { return looptype; }
+        
+        
+        
+        
+        
+        virtual void start() = 0;
+        
+        void start(float delay)
+        {
+            this->delay = delay;
+            
+            this->start();
+        }
+        
+        void start(Callback callback)
+        {
+            this->callback = callback;
+            
+            this->start();
+        }
+        
+        void start(LoopTypes::Type loop)
+        {
+            this->looptype = loop;
+            
+            this->start();
+        }
+        
+        void start(float delay, Callback callback)
+        {
+            this->callback = callback;
+            
+            this->start(delay);
+        }
+        
+        void start(float delay, LoopTypes::Type loop)
+        {
+            this->looptype = loop;
+            
+            this->start(delay);
+        }
+        
+        void start(Callback callback, LoopTypes::Type loop)
+        {
+            this->callback = callback;
+            
+            this->start(loop);
+        }
+        
+        void start(float delay, Callback callback, LoopTypes::Type loop)
+        {
+            this->delay    = delay;
+            this->callback = callback;
+            
+            this->start(loop);
+        }
+        
+        
+        
+        
+        
+        void restart()
+        {
+            finished = false;
+            this->start();
+        }
+        
+        virtual void stop() { delete this; }
+    };
     
-    
-    
-    
-    
-    void restart()
-    {
-        finished = false;
-        this->start();
-    }
-    
-    virtual void stop() { delete this; }
-};
+}
 
 
 
