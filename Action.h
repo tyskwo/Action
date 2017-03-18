@@ -350,6 +350,35 @@ namespace Action
             }
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    namespace Search
+    {
+        template <typename T>
+        void RemoveSingles(Value<T>* value)
+        {
+            for(int i = 0; i < singles.size(); i++)
+            {
+                if(&(static_cast<Single<T>*>(singles.at(i))->getValue()->current) == &value->current)
+                {
+                    singles.at(i)->stop();
+                    
+                    singles.at(i) = NULL;
+                    singles.erase(singles.begin() + i);
+                    ++i;
+                }
+            }
+        }
+        
+    }
+    
+    
 }
 
 

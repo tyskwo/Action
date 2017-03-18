@@ -14,21 +14,23 @@
 
 #include "Bezier.h"
 #include "LoopTypes.h"
+#include "Search.h"
 #include "Timer.h"
 #include "TimingFunctions.h"
 
 
 
-// typedefs for what is a TimingFunction and a Callback
-typedef std::function<float(float t)> TimingFunction;
-//typedef float (*TimingFunction)(float);
-typedef std::function<void()> Callback;
-
 
 
 namespace Action
 {
-
+    
+    // typedefs for what is a TimingFunction and a Callback
+    typedef std::function<float(float t)> TimingFunction;
+    //typedef float (*TimingFunction)(float);
+    typedef std::function<void()> Callback;
+    
+    
     class ActionBase
     {
         

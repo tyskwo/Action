@@ -26,28 +26,40 @@ namespace Action
         
         Value<T> (T *current, T start, T end)
         {
-            this->start = start;
-            this->end   = end;
-            
             // set the reference to current
             this->current = current;
             
             // set the value of current
-            *this->current = start;
+            *this->current = (this->start = start);
+            
+            this->end = end;
         }
         
         
         
-        Value<T> (T start, T end)
+        Value<T> (T *current, T end)
         {
-            this->start = start;
-            this->end   = end;
-            *this->current = start;
+            this->current = current;
+            
+            this->start = (*this->current = *current);
+            
+            this->end = end;
         }
         
         
         
-        Value<T>() { *this->current = this->start; }
+        Value<T> (T start, T *current)
+        {
+            this->current = current;
+            
+            this->end = *current;
+            
+            *this->current = (this->start = start);
+        }
+        
+        
+        
+        Value<T>() {}
     };
 
 }

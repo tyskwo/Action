@@ -44,22 +44,24 @@ namespace Action
         
     private:
         
+        bool isPaused = false;
+        
     #if defined(__MACH__)
         
         clock_serv_t    system_clock;
-        mach_timespec_t time1, time2;
+        mach_timespec_t time1, time2, pauseStart, pauseDuration;
         
      
         
     #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
         
-        struct timespec time1, time2;
+        struct timespec time1, time2, pauseStart, pauseDuration;
 
         
         
     #elif defined(_WIN32)
         
-        LARGE_INTEGER ticks1, ticks2;
+        LARGE_INTEGER ticks1, ticks2, pauseStart, pauseDuration;
         double frequency;
         
     #endif
@@ -76,7 +78,6 @@ namespace Action
     #if defined(__MACH__)
             
             host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &system_clock);
-            
             
             
     #elif _WIN32
@@ -112,18 +113,22 @@ namespace Action
     #if defined(__MACH__)
             
             clock_get_time(system_clock, &time1);
+            pauseDuration.tv_sec  = 0;
+            pauseDuration.tv_nsec = 0;
             
 
             
     #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
             
             clock_gettime(CLOCK_MONOTONIC, &time1);
-            
+            pauseDuration.tv_sec  = 0;
+            pauseDuration.tv_nsec = 0;
             
             
     #elif _WIN32
             
             QueryPerformanceCounter(&ticks1);
+            pauseDuration.QuadPart = 0;
             
     #endif
         }
@@ -134,27 +139,109 @@ namespace Action
         
         double getElapsedMS()
         {
-            
-    #if defined(__MACH__)
-            
-            clock_get_time(system_clock, &time2);
-            return ((1000.0 * static_cast<double>(time2.tv_sec - time1.tv_sec)) + static_cast<double>((time2.tv_nsec - time1.tv_nsec) / 1000000.0));
+            if(!isPaused)
+            {
+                #if defined(__MACH__)
+                        
+                    clock_get_time(system_clock, &time2);
+                    return ((1000.0 * static_cast<double>(time2.tv_sec - time1.tv_sec - pauseDuration.tv_sec)) + static_cast<double>((time2.tv_nsec - time1.tv_nsec - pauseDuration.tv_nsec) / 1000000.0));
 
 
+                        
+                #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
+                        
+                    clock_gettime(CLOCK_MONOTONIC, &time2);
+                    return ((1000.0 * static_cast<double>(time2.tv_sec - time1.tv_sec - pauseDuration.tv_sec)) + static_cast<double>(time2.tv_nsec - time1.tv_nsec - pauseDuration.tv_nsec) / 1000000.0);
+
+                        
+                        
+                #elif _WIN32
+                        
+                    QueryPerformanceCounter(&ticks2);
+                    return (static_cast<double>(ticks2.QuadPart - ticks1.QuadPart - pauseDuration.QuadPart) * 1000.0) / frequency;
+                        
+                #endif
+            }
             
-    #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
+            else
+            {
+                #if defined(__MACH__)
+                
+                    return ((1000.0 * static_cast<double>(pauseStart.tv_sec - time1.tv_sec - pauseDuration.tv_sec)) + static_cast<double>((pauseStart.tv_nsec - time1.tv_nsec - pauseDuration.tv_nsec) / 1000000.0));
+                
+                
+                
+                #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
+                
+                    return ((1000.0 * static_cast<double>(pauseStart.tv_sec - time1.tv_sec - pauseDuration.tv_sec)) + static_cast<double>(pauseStart.tv_nsec - time1.tv_nsec - pauseDuration.tv_nsec) / 1000000.0);
+                
+                
+                
+                #elif _WIN32
+                
+                    return (static_cast<double>(pauseStart.QuadPart - ticks1.QuadPart - pauseDuration.QuadPart) * 1000.0) / frequency;
+                
+                #endif
+            }
             
-            clock_gettime(CLOCK_MONOTONIC, &time2);
-            return ((1000.0 * static_cast<double>(time2.tv_sec - time1.tv_sec)) + static_cast<double>(time2.tv_nsec - time1.tv_nsec) / 1000000.0);
+            return 0;
+        }
+        
+        
+        
+        
+        void pause()
+        {
+            isPaused = true;
+            
+            #if defined(__MACH__)
+            
+                clock_get_time(system_clock, &pauseStart);
+            
+            
+            #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
+            
+                clock_gettime(CLOCK_MONOTONIC, &pauseStart);
+            
+            
+            #elif _WIN32
+            
+                QueryPerformanceCounter(&pauseStart);
+            
+            #endif
+        }
+        
+        
+        
+        
+        
+        void resume()
+        {
+            isPaused = false;
+            
+            #if defined(__MACH__)
+            
+                clock_get_time(system_clock, &pauseDuration);
+            
+                pauseDuration.tv_nsec -= pauseStart.tv_nsec;
+                pauseDuration.tv_sec  -= pauseStart.tv_sec;
 
             
+            #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
             
-    #elif _WIN32
+                clock_gettime(CLOCK_MONOTONIC, &pauseDuration);
             
-            QueryPerformanceCounter(&ticks2);
-            return (static_cast<double>(ticks2.QuadPart - ticks1.QuadPart) * 1000.0) / frequency;
+                pauseDuration.tv_nsec -= pauseStart.tv_nsec;
+                pauseDuration.tv_sec  -= pauseStart.tv_sec;
             
-    #endif
+            
+            #elif _WIN32
+            
+                QueryPerformanceCounter(&pauseDuration);
+            
+                pauseDuration.QuadPart -= pauseStart.QuadPart;
+
+            #endif
         }
     };
     

@@ -18,7 +18,7 @@ class Test
     
 public:
     
-    int   testInt;
+    int   testInt, testInt2, testInt3;
     float testFloat;
     char  testChar;
     
@@ -43,14 +43,23 @@ int main(int argc, const char * argv[])
     
     // let's create some values.
     //                            variable to change, 'start' value, 'end' value
-    Action::Value<int>   value1 { &t->testInt,          0,           100 };
-    Action::Value<float> value2 { &t->testFloat,        0,           500 };
-    Action::Value<char>  value3 { &t->testChar,       'A',           'Z' };
+    Action::Value<int>   value1 { &t->testInt,         0,            100 };
+
+    // 'To' tween:                              'end' value
+    Action::Value<int>   value1a { &t->testInt2, 100 };
+    
+    // 'From' tween:              'start' value
+    Action::Value<int>   value1b { -100, &t->testInt3 };
     
     
-    TimingFunction tf = Action::Bezier::GetCurveFromPoints(std::make_pair (1.0f, 0.32f), std::make_pair (0.0f, 0.82f));
+    Action::Value<float> value2 { &t->testFloat,   0, 500 };
+    Action::Value<char>  value3 { &t->testChar,  'A', 'Z' };
+
     
-    Action::addSingle(&value1, 3.0f,     0.5f,  tf,  std::bind([&](){ t->OnComplete("SINGLE", 1); }), Action::LoopTypes::None);
+    
+    Action::TimingFunction tf = Action::GetCurveFromPoints(1.0f, 0.32f, 0.0f, 0.82f);
+    
+    Action::addSingle(&value1a, 3.0f, 0.5f, tf, std::bind([&](){ t->OnComplete("SINGLE", 1); }), Action::LoopTypes::None);
 
     
 /*
@@ -112,7 +121,11 @@ int main(int argc, const char * argv[])
     {
         Action::update();
         
+        
         std::cout << t->testInt << "    " << t->testFloat << "    " << t->testChar << '\n'; // print out current value to see it in progress
+        
+        
+        // if(*value1.current >= 50) Action::Search::RemoveSingles(&value1); // remove any single attached to 'value1' when value1's value is >=50
     }
     
     

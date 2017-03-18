@@ -121,6 +121,8 @@ namespace Action
         
         
         
+        inline Value<T>* getValue() { return value; }
+
         inline T getCurrentValue() { return value->current; }
     };
     
