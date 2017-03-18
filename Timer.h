@@ -12,25 +12,8 @@
 
 
 
-#if defined(__MACH__)
-#include <mach/clock.h>
-#include <mach/mach.h>
+#include <chrono>
 
-
-
-#elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
-#include <time.h>
-#include <sys/time.h>
-
-
-
-#elif defined(_WIN32)
-#if defined(_MSC_VER) && !defined(NOMINMAX)
-#define NOMINMAX
-#endif
-
-#include <windows.h>
-#endif
 
 
 
@@ -44,93 +27,19 @@ namespace Action
         
     private:
         
-        bool isPaused = false;
+        std::chrono::time_point<std::chrono::high_resolution_clock> previousTime, currentTime;
         
-    #if defined(__MACH__)
-        
-        clock_serv_t    system_clock;
-        mach_timespec_t time1, time2, pauseStart, pauseDuration;
-        
-     
-        
-    #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
-        
-        struct timespec time1, time2, pauseStart, pauseDuration;
-
-        
-        
-    #elif defined(_WIN32)
-        
-        LARGE_INTEGER ticks1, ticks2, pauseStart, pauseDuration;
-        double frequency;
-        
-    #endif
-        
-        
-        
+        std::chrono::duration<double, std::milli> elapsed;
         
         
     public:
         
-        Timer()
-        {
-            
-    #if defined(__MACH__)
-            
-            host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &system_clock);
-            
-            
-    #elif _WIN32
+        bool isPaused = false;
 
-            LARGE_INTEGER freq;
-            QueryPerformanceFrequency(&freq);
-            frequency = static_cast<double>(freq.QuadPart);
-            
-    #endif
-        }
-        
-
-        
-        
-        
-        ~Timer()
-        {
-            
-    #if defined(__MACH__)
-            
-            mach_port_deallocate(mach_task_self(), system_clock);
-            
-    #endif
-        }
-        
-        
-        
-        
         
         inline void start()
         {
-            
-    #if defined(__MACH__)
-            
-            clock_get_time(system_clock, &time1);
-            pauseDuration.tv_sec  = 0;
-            pauseDuration.tv_nsec = 0;
-            
-
-            
-    #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
-            
-            clock_gettime(CLOCK_MONOTONIC, &time1);
-            pauseDuration.tv_sec  = 0;
-            pauseDuration.tv_nsec = 0;
-            
-            
-    #elif _WIN32
-            
-            QueryPerformanceCounter(&ticks1);
-            pauseDuration.QuadPart = 0;
-            
-    #endif
+            previousTime = std::chrono::high_resolution_clock::now();
         }
         
         
@@ -141,107 +50,24 @@ namespace Action
         {
             if(!isPaused)
             {
-                #if defined(__MACH__)
-                        
-                    clock_get_time(system_clock, &time2);
-                    return ((1000.0 * static_cast<double>(time2.tv_sec - time1.tv_sec - pauseDuration.tv_sec)) + static_cast<double>((time2.tv_nsec - time1.tv_nsec - pauseDuration.tv_nsec) / 1000000.0));
-
-
-                        
-                #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
-                        
-                    clock_gettime(CLOCK_MONOTONIC, &time2);
-                    return ((1000.0 * static_cast<double>(time2.tv_sec - time1.tv_sec - pauseDuration.tv_sec)) + static_cast<double>(time2.tv_nsec - time1.tv_nsec - pauseDuration.tv_nsec) / 1000000.0);
-
-                        
-                        
-                #elif _WIN32
-                        
-                    QueryPerformanceCounter(&ticks2);
-                    return (static_cast<double>(ticks2.QuadPart - ticks1.QuadPart - pauseDuration.QuadPart) * 1000.0) / frequency;
-                        
-                #endif
+                currentTime = std::chrono::high_resolution_clock::now();
+                
+                elapsed += currentTime - previousTime;
+                
+                previousTime = currentTime;
             }
             
-            else
-            {
-                #if defined(__MACH__)
-                
-                    return ((1000.0 * static_cast<double>(pauseStart.tv_sec - time1.tv_sec - pauseDuration.tv_sec)) + static_cast<double>((pauseStart.tv_nsec - time1.tv_nsec - pauseDuration.tv_nsec) / 1000000.0));
-                
-                
-                
-                #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
-                
-                    return ((1000.0 * static_cast<double>(pauseStart.tv_sec - time1.tv_sec - pauseDuration.tv_sec)) + static_cast<double>(pauseStart.tv_nsec - time1.tv_nsec - pauseDuration.tv_nsec) / 1000000.0);
-                
-                
-                
-                #elif _WIN32
-                
-                    return (static_cast<double>(pauseStart.QuadPart - ticks1.QuadPart - pauseDuration.QuadPart) * 1000.0) / frequency;
-                
-                #endif
-            }
-            
-            return 0;
+            return elapsed.count();
         }
         
         
         
         
-        void pause()
-        {
-            isPaused = true;
-            
-            #if defined(__MACH__)
-            
-                clock_get_time(system_clock, &pauseStart);
-            
-            
-            #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
-            
-                clock_gettime(CLOCK_MONOTONIC, &pauseStart);
-            
-            
-            #elif _WIN32
-            
-                QueryPerformanceCounter(&pauseStart);
-            
-            #endif
-        }
-        
-        
-        
-        
-        
+        void pause()  { isPaused = true; }
         void resume()
         {
             isPaused = false;
-            
-            #if defined(__MACH__)
-            
-                clock_get_time(system_clock, &pauseDuration);
-            
-                pauseDuration.tv_nsec -= pauseStart.tv_nsec;
-                pauseDuration.tv_sec  -= pauseStart.tv_sec;
-
-            
-            #elif (defined(linux) || defined(__linux__) || defined(__linux)) || (defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__))
-            
-                clock_gettime(CLOCK_MONOTONIC, &pauseDuration);
-            
-                pauseDuration.tv_nsec -= pauseStart.tv_nsec;
-                pauseDuration.tv_sec  -= pauseStart.tv_sec;
-            
-            
-            #elif _WIN32
-            
-                QueryPerformanceCounter(&pauseDuration);
-            
-                pauseDuration.QuadPart -= pauseStart.QuadPart;
-
-            #endif
+            previousTime = std::chrono::high_resolution_clock::now();
         }
     };
     

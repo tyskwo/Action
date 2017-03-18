@@ -51,7 +51,21 @@ namespace Action
             return returnValue;
         };
         
+        void pause()
+        {
+            for(auto&& s : singles)
+            {
+                s->pause();
+            }
+        }
         
+        void resume()
+        {
+            for(auto&& s : singles)
+            {
+                s->resume();
+            }
+        }
         
         void stop()
         {

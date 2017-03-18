@@ -27,8 +27,7 @@ namespace Action
     
     // typedefs for what is a TimingFunction and a Callback
     typedef std::function<float(float t)> TimingFunction;
-    //typedef float (*TimingFunction)(float);
-    typedef std::function<void()> Callback;
+    typedef std::function<void()>         Callback;
     
     
     class ActionBase
@@ -132,6 +131,8 @@ namespace Action
             this->start();
         }
         
+        virtual void pause()  = 0;
+        virtual void resume() = 0;
         virtual void stop() { delete this; }
     };
     

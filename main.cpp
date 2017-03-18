@@ -46,10 +46,10 @@ int main(int argc, const char * argv[])
     Action::Value<int>   value1 { &t->testInt,         0,            100 };
 
     // 'To' tween:                              'end' value
-    Action::Value<int>   value1a { &t->testInt2, 100 };
+    //Action::Value<int>   value1a { &t->testInt2, 100 };
     
     // 'From' tween:              'start' value
-    Action::Value<int>   value1b { -100, &t->testInt3 };
+    //Action::Value<int>   value1b { -100, &t->testInt3 };
     
     
     Action::Value<float> value2 { &t->testFloat,   0, 500 };
@@ -59,16 +59,16 @@ int main(int argc, const char * argv[])
     
     Action::TimingFunction tf = Action::GetCurveFromPoints(1.0f, 0.32f, 0.0f, 0.82f);
     
-    Action::addSingle(&value1a, 3.0f, 0.5f, tf, std::bind([&](){ t->OnComplete("SINGLE", 1); }), Action::LoopTypes::None);
+    Action::addSingle(&value1, 3.0f, 0.5f, tf, std::bind([&](){ t->OnComplete("SINGLE", 1); }), Action::LoopTypes::None);
 
     
-/*
+
     // let's create two single Actions:
     
     //                value,   duration, delay, timing function,                             callback
-    Action::addSingle(&value1, 3.0f,     0.5f,  Action::TimingFunctions::ExponentialEaseIn,  std::bind([&](){ t->OnComplete("SINGLE", 1); }), Action::LoopTypes::None);
-    Action::addSingle(&value2, 3.0f,            Action::TimingFunctions::ExponentialEaseOut, std::bind([&](){ t->OnComplete("SINGLE", 2); }), Action::LoopTypes::None);
-*/
+    //Action::addSingle(&value1, 3.0f,     0.5f,  Action::TimingFunctions::ExponentialEaseIn,  std::bind([&](){ t->OnComplete("SINGLE", 1); }), Action::LoopTypes::None);
+    Action::addSingle(&value2, 3.0f,  6.0f,    Action::TimingFunctions::ExponentialEaseOut, std::bind([&](){ t->OnComplete("SINGLE", 2); }), Action::LoopTypes::None);
+
  
     
     
@@ -119,13 +119,24 @@ int main(int argc, const char * argv[])
     // so long as any Action is not finished...
     while(!Action::isEmpty())
     {
+        if(*value1.current == 50 && *value2.current < 250.0f)
+        {
+            Action::singles.at(0)->pause();
+        }
+        else if(*value2.current == 500.0f && Action::singles.at(0)->isPaused())
+        {
+            Action::singles.at(0)->resume();
+        }
+        
         Action::update();
+        
         
         
         std::cout << t->testInt << "    " << t->testFloat << "    " << t->testChar << '\n'; // print out current value to see it in progress
         
         
-        // if(*value1.current >= 50) Action::Search::RemoveSingles(&value1); // remove any single attached to 'value1' when value1's value is >=50
+
+        //Action::Search::RemoveSingles(&value1); // remove any single attached to 'value1' when value1's value is >=50
     }
     
     

@@ -43,7 +43,8 @@ namespace Action
         virtual ~SingleBase() {};
         
         inline bool isFinished() { return finished; };
-        
+        inline bool isPaused()   { return timer.isPaused; };
+
         
         inline void setTimingFunction(TimingFunction tf      ) { this->timingFunction = tf;       }
         inline void setDuration      (float          duration) { this->duration       = duration; }
@@ -52,8 +53,10 @@ namespace Action
         inline float getDuration() { return duration; }
         
         
-        void start() { this->timer.start(); }
-        void stop()  { delete this;         }
+        void start()  { this->timer.start();  }
+        void pause()  { this->timer.pause();  }
+        void resume() { this->timer.resume(); }
+        void stop()   { delete this;          }
     };
     
 }
